@@ -1,38 +1,87 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../features/auth/authSlice';
+import { TextField, Button, Paper, Typography, Box, CircularProgress } from '@mui/material';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const dispatch = useDispatch();
   const { status, error } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(login(formData));
+    const result = await dispatch(login(formData));
+    if (!result.error) {
+      navigate('/dashboard');
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 p-6 bg-white rounded shadow">
-      <input
-        type="email"
-        placeholder="Email"
-        className="w-full p-2 mb-4 border rounded"
-        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        className="w-full p-2 mb-4 border rounded"
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-      />
-      <button 
-        disabled={status === 'loading'}
-        className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          mt: 8
+        }}
       >
-        {status === 'loading' ? 'Loading...' : 'Login'}
-      </button>
-      {error && <p className="text-red-500 mt-2">{error}</p>}
-    </form>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            maxWidth: 400,
+            gap: 2
+          }}
+        >
+          <Typography variant="h5" component="h1" gutterBottom align="center">
+            Welcome Back
+          </Typography>
+          
+          <TextField
+            label="Email"
+            type="email"
+            fullWidth
+            variant="outlined"
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          />
+          
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            variant="outlined"
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          />
+          
+          <Button
+            variant="contained"
+            fullWidth
+            size="large"
+            onClick={handleSubmit}
+            disabled={status === 'loading'}
+            startIcon={status === 'loading' ? <CircularProgress size={20} color="inherit" /> : null}
+          >
+            Login
+          </Button>
+
+          {error && (
+            <Typography color="error" align="center">
+              {error}
+            </Typography>
+          )}
+        </Paper>
+      </Box>
+    </motion.div>
   );
 }

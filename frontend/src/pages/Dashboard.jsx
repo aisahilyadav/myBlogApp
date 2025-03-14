@@ -1,41 +1,121 @@
-import { useEffect, useState } from 'react';
+import { Container, Grid, Paper, Typography, Button, Box, Card, CardContent } from '@mui/material';
+import { ExploreOutlined, PersonOutline, PostAdd, PeopleOutline } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import CreateBlog from '../components/CreateBlog';
 
 export default function Dashboard() {
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Welcome, {user.username}!</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="space-y-3">
-            <Link 
-              to="/explore" 
-              className="block w-full p-2 text-center bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Discover Users
-            </Link>
-            <Link 
-              to="/profile" 
-              className="block w-full p-2 text-center bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              View Profile
-            </Link>
-          </div>
-        </div>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Typography variant="h3" gutterBottom>
+          Welcome, {user.username}!
+        </Typography>
+      </motion.div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Stats</h2>
-          <div className="space-y-2">
-            <p>Friends: {user.friends?.length || 0}</p>
-            <p>Pending Requests: {user.friendRequests?.length || 0}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={8}>
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.2 }}
+          >
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="h5" gutterBottom>
+                Create New Post
+              </Typography>
+              <CreateBlog />
+            </Paper>
+          </motion.div>
+        </Grid>
+
+        <Grid item xs={12} md={4}>
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.4 }}
+          >
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Quick Stats
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Card>
+                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <PeopleOutline />
+                    <Typography>
+                      Friends: {user.friends?.length || 0}
+                    </Typography>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <PostAdd />
+                    <Typography>
+                      Posts: {user.posts?.length || 0}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Box>
+            </Paper>
+          </motion.div>
+        </Grid>
+
+        <Grid item xs={12}>
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.6 }}
+          >
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Quick Actions
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={<ExploreOutlined />}
+                    onClick={() => navigate('/explore')}
+                    sx={{ p: 2 }}
+                  >
+                    Discover Users
+                  </Button>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="secondary"
+                    startIcon={<PersonOutline />}
+                    onClick={() => navigate('/profile')}
+                    sx={{ p: 2 }}
+                  >
+                    View Profile
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+          </motion.div>
+        </Grid>
+      </Grid>
+    </Container>
   );
 } 

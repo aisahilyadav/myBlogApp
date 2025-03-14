@@ -1,90 +1,108 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { Container, Paper, Typography, TextField, Button, Grid, Avatar, Box, Divider } from '@mui/material';
+import { Edit, Save, Cancel } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
-import userService from '../services/userService';
 
 export default function Profile() {
   const { user } = useSelector((state) => state.auth);
-  const [bio, setBio] = useState(user.bio || '');
+  const [profileData, setProfileData] = useState({
+    bio: user?.bio || '',
+    email: user?.email || '',
+    username: user?.username || ''
+  });
   const [isEditing, setIsEditing] = useState(false);
-  const [friends, setFriends] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await userService.getProfile(user.id);
-        setFriends(response.data.friends);
-      } catch (error) {
-        toast.error('Failed to fetch profile data');
-      }
-    };
-    fetchProfile();
-  }, [user.id]);
-
-  const handleUpdateBio = async () => {
+  const handleUpdateProfile = async () => {
+    setLoading(true);
     try {
-      await userService.updateProfile({ bio });
+      // Implement your update profile logic here
       setIsEditing(false);
       toast.success('Profile updated successfully');
     } catch (error) {
       toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="container mx-auto p-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
-        <h1 className="text-3xl font-bold mb-4">{user.username}</h1>
-        
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Bio</h2>
-          {isEditing ? (
-            <div className="space-y-2">
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                className="w-full p-2 border rounded"
-                rows="4"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleUpdateBio}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <p className="mb-2">{bio || 'No bio yet'}</p>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Edit Bio
-              </button>
-            </div>
-          )}
-        </div>
+  if (!user) {
+    return (
+      <Container>
+        <Typography>Please login to view profile</Typography>
+      </Container>
+    );
+  }
 
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Friends ({friends.length})</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {friends.map((friend) => (
-              <div key={friend._id} className="p-3 border rounded">
-                <p className="font-semibold">{friend.username}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+  return (
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} display="flex" justifyContent="center">
+              <Avatar
+                sx={{ width: 100, height: 100, mb: 2 }}
+                src={user.avatar}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h4" gutterBottom textAlign="center">
+                {user.username}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Box display="flex" justifyContent="flex-end" mb={2}>
+                <Button
+                  startIcon={isEditing ? <Cancel /> : <Edit />}
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? 'Cancel' : 'Edit Profile'}
+                </Button>
+              </Box>
+              <TextField
+                fullWidth
+                label="Bio"
+                multiline
+                rows={4}
+                value={profileData.bio}
+                onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                disabled={!isEditing}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                value={profileData.email}
+                disabled
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Username"
+                value={profileData.username}
+                disabled
+                sx={{ mb: 2 }}
+              />
+              {isEditing && (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={handleUpdateProfile}
+                  disabled={loading}
+                >
+                  Save Changes
+                </Button>
+              )}
+            </Grid>
+          </Grid>
+        </Paper>
+      </motion.div>
+    </Container>
   );
 } 
